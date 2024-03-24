@@ -3,6 +3,9 @@
 
 **Requires go 1.22.1 or above**
 
+**To run the unit tests on this package**
+``go test -v``
+
 **The package is still under development**
 
 ***To initialize call*** `gweb.New()`
@@ -133,7 +136,7 @@ func index(ctx *gweb.WebContext) error {
 }
 ```
 
-**To write unit test check the smaple below**
+**To write unit test check the sample below**
 
 ```
 
