@@ -87,23 +87,10 @@ func (wc *WebContext) SendString(data string, contentType ...string) error {
 	}
 	wc.Writer.WriteHeader(wc.ReplyStatus)
 	var err error
-	var n, total int64
 
-	for {
-		n, err = io.Copy(wc.Writer, strings.NewReader(data))
+	_, err = io.Copy(wc.Writer, strings.NewReader(data))
 
-		if err != nil {
-			return err
-		}
-		if err == io.EOF {
-			return nil
-		}
-		total += n
-		if total == int64(len(data)) {
-			return nil
-		}
-	}
-
+	return err
 }
 
 // SendString ... send the text data
@@ -116,22 +103,9 @@ func (wc *WebContext) SendBytes(data []byte) error {
 	}
 	wc.Writer.WriteHeader(wc.ReplyStatus)
 	var err error
-	var n, total int64
-	for {
-		n, err = io.Copy(wc.Writer, bytes.NewReader(data))
 
-		if err != nil {
-			return err
-		}
-		if err == io.EOF {
-			return nil
-		}
-		total += n
-		if total == int64(len(data)) {
-			return nil
-		}
-	}
-
+	_, err = io.Copy(wc.Writer, bytes.NewReader(data))
+	return err
 }
 
 // Render ... render the html data
