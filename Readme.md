@@ -42,17 +42,6 @@ For example :
          return nil
         }
 
-**Render HTML**
-
-```
-func index(ctx *gweb.WebContext) error {
-    ctx.WebLog.Info("Index html")
-
-    ctx.Render(<h1>Hello</h1>)
-    return nil
-}
-```
-
 **Adding a handler**
 
 `web.Get("/hello", sayHello)`
@@ -102,39 +91,44 @@ Any function with the following signature can be used as middleware:
 
 **Sending a string as response**
 
+```
     func sayHelloV1(ctx *gweb.WebContext) error {
     
      //Get path value
-    
      ctx.WebLog.Info(ctx.GetPathValue(key))
-    
      //Get Query param
-    
      ctx.WebLog.Info(ctx.GetParam(key))
-    
-      
-    
-     ctx.Status(200).SendString("Hello World")
-    
+
+     ctx.Status(200).SendString("Hello World") 
      return nil
     
      }
+```
 
 **Sending JSON**
 
+```
     func getUser(ctx *gweb.WebContext) error {
     
-     usr := new(User)
-    
-     if err:= ctx.ParseBody(usr);err!=nil{
-        ctx.WebLog.Error("Body Parsing","parse error",err)
-        return err
-     }
-    
-     ctx.WebLog.Info("Data","user",usr)
-    
-     ctx.JSON(usr)
-    
-     return nil
+        usr := new(User)
+        if err:= ctx.ParseBody(usr);err!=nil{
+            ctx.WebLog.Error("Body Parsing","parse error",err)
+            return err
+        }
+        ctx.WebLog.Info("Data","user",usr)
+        ctx.JSON(usr)
+        return nil
     
      }
+```
+
+**Render HTML**
+
+```
+func index(ctx *gweb.WebContext) error {
+    ctx.WebLog.Info("Index html")
+
+    ctx.Render(<h1>Hello</h1>)
+    return nil
+}
+```
