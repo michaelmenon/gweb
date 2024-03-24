@@ -149,7 +149,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 		}
 	}
 	if len(wg) > 0 {
-		copy(wc.middlewares, wg[0].middlewares)
+		wc.middlewares = append(wc.middlewares, wg[0].middlewares...)
 		wg[0].router.HandleFunc(pattern, handler)
 
 	} else {
