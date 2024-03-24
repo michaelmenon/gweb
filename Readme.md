@@ -25,6 +25,8 @@ In a seperate gweb service you can push messages with the followin syntax:
 
 **Handler type**
 
+Any function with the following signature is a Handler
+
     func(ctx *gweb.WebContext) error
 
 For example :
@@ -84,8 +86,6 @@ Any function with the following signature can be used as middleware:
         v1.Get("/hell", sayHelloV1)
         
         v1.Post("/user", postUser)
-
-Any function with the following signature is a Handler
 
 **Running the webserver**
 
