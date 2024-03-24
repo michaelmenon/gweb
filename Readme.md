@@ -3,7 +3,7 @@
 
 **Requires go 1.22.1 or above**
 
-**The package is still under development. Do not use in production**
+**The package is still under development**
 
 ***To initialize call*** `gweb.New()`
 
@@ -12,6 +12,9 @@
 **To enable logging**
 
     web.WithLogging()
+
+**To initialize with logging**
+web := gweb.New().WithLogging()
 
 **To use a message stream between two services use the default redis message broker provided**
 
@@ -55,6 +58,10 @@ func index(ctx *gweb.WebContext) error {
 `web.Get("/hello", sayHello)`
 
 `web.Post("/getUser",userHandler)`
+
+`web.Put("/putUser",userHandler)`
+
+`web.Delete("/deleteUser",deleteUserHandler)`
 
 Supported HTTP Verbs:
 **GET POST PUT DELETE OPTIONS PATCH**
