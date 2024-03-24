@@ -35,9 +35,7 @@ func (wc *WebContext) Status(status int) *WebContext {
 
 // SendError ... sends the error passed as a response with the ReplyStatus set
 func (wc *WebContext) SendError(err error) {
-	if wc.ReplyStatus == 0 {
-		wc.ReplyStatus = http.StatusInternalServerError
-	}
+	wc.ReplyStatus = http.StatusInternalServerError
 	http.Error(wc.Writer, err.Error(), wc.ReplyStatus)
 }
 
@@ -105,6 +103,7 @@ func (wc *WebContext) SendBytes(data []byte) error {
 	var err error
 
 	_, err = io.Copy(wc.Writer, bytes.NewReader(data))
+
 	return err
 }
 
