@@ -38,7 +38,11 @@ For example :
 **Adding a handler**
 
 `web.Get("/hello", sayHello)`
+
 `web.Post("/getUser",userHandler)`
+
+Supported HTTP Verbs:
+**GET POST PUT DELETE OPTIONS PATCH**
 
 **Adding a middleware**
 
