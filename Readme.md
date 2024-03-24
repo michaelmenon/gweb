@@ -108,11 +108,11 @@ Any function with the following signature can be used as middleware:
     func sayHelloV1(ctx *gweb.WebContext) error {
     
      //Get path value
-     ctx.WebLog.Info(ctx.GetPathValue(key))
+     ctx.WebLog.Info().Msg(ctx.GetPathValue(key))
      //Get Query param
-     ctx.WebLog.Info(ctx.GetParam(key))
+     ctx.WebLog.Info().Msg(ctx.GetParam(key))
 
-     ctx.Status(200).SendString("Hello World") 
+     ctx.Status(200).SendString(strings.NewReader("Hello World")) 
      return nil
     
      }
@@ -135,13 +135,31 @@ Any function with the following signature can be used as middleware:
      }
 ```
 
-**Render HTML**
+**Render HTML String**
 
 ```
 func index(ctx *gweb.WebContext) error {
-    ctx.WebLog.Info("Index html")
+    ctx.WebLog.Info().Msg("Index html")
 
-    ctx.Render("<h1>Hello</h1>")
+    ctx.RenderString(string.NewReader("<h1>Hello</h1>"))
+    return nil
+}
+```
+
+**Render HTML Files**
+
+```
+func index(ctx *gweb.WebContext) error {
+    
+    funcMap := template.FuncMap{
+  "upper": func(s string) string {
+   return strings.ToUpper(s)
+  }, // Register the custom "upper" function
+ }
+
+    //all the html files are in the templates/ folder. The main home page is index.html
+    data := "World!"
+    ctx.Status(200).RenderFiles("templates/*.html", data, "index.html", funcMap)
     return nil
 }
 ```
@@ -154,7 +172,7 @@ func TestGet(t *testing.T) {
     web := New()
     web.Get("/world", func(ctx *WebContext) error {
 
-    ctx.Status(200).SendString("Hello, world!")
+    ctx.Status(200).SendString(strings.NewReader("Hello, world!))
     return nil
     })
     // Create a new HTTP request to the handler function
