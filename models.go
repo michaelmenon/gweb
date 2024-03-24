@@ -3,6 +3,8 @@ package gweb
 import (
 	"net/http"
 	"net/url"
+
+	"github.com/rs/zerolog"
 )
 
 // a web handler type
@@ -28,6 +30,7 @@ type Web struct {
 	//if we need custom cors headers and methods support
 	customHeader []string
 	custMethods  []string
+	WebLog       *zerolog.Logger
 }
 
 type WebGroup struct {
@@ -45,6 +48,7 @@ type WebContext struct {
 	//set by the handler
 	ReplyStatus int
 	middlewares []WebHandler
+	WebLog      *zerolog.Logger
 }
 
 // GwebMessage received for this Gweb Service

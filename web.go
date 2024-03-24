@@ -27,13 +27,10 @@ func New() *Web {
 			httpServer:  httpServer,
 			middlewares: make([]WebHandler, 0),
 			router:      router,
+			WebLog:      &zerolog.Logger{},
 		}
 	})()
 	return w
-}
-
-func (wc *Web) WebLog() zerolog.Logger {
-	return log.Logger
 }
 
 // enable global logging for all the routes
@@ -101,6 +98,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 
 	wc := &WebContext{
 		middlewares: make([]WebHandler, len(w.middlewares)),
+		WebLog:      w.WebLog,
 	}
 	//save the middlewares that needs to be called for this route
 	copy(wc.middlewares, w.middlewares)
