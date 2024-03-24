@@ -1,6 +1,8 @@
 
 `go get github.com/michaelmenon/gweb`
 
+**Requires go 1.22.1 or above**
+
 **The package is still under development. Do not use in production**
 
 ***To initialize call*** `gweb.New()`
