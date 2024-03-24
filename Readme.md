@@ -1,4 +1,6 @@
 ```
+The package is still under development. Do not use in production
+
 ** To initialize call gweb.New() **
 web := gweb.New()
 
