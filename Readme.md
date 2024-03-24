@@ -3,11 +3,11 @@
 
 ***To initialize call*** `gweb.New()`
 
-web := gweb.New()
+    web := gweb.New()
 
 **To enable logging**
 
-web.WithLogging()
+    web.WithLogging()
 
 **To use a message stream between two services use the default redis message broker**
 
@@ -23,19 +23,15 @@ In a seperate gweb service you can push messages wiht the followin syntax:
 
 **Handler type**
 
-func(ctx *gweb.WebContext) error
+    func(ctx *gweb.WebContext) error
 
 For example :
 
-func sayHello(ctx *gweb.WebContext) error {
-
-ctx.WebLog.Info(ctx.Request.URL.Path)
-
-ctx.Status(400).SendString("BAD")
-
-return nil
-
-}
+       func sayHello(ctx *gweb.WebContext) error {
+         ctx.WebLog.Info(ctx.Request.URL.Path)
+         ctx.Status(400).SendString("BAD")
+         return nil
+        }
 
 **Adding a handler**
 
@@ -51,11 +47,11 @@ gweb provides a default middleware for handleing JWT authenitcation. You can use
 
 Any function with the following signature can be used as middleware:
 
-    func(ctx *gweb.WebContext) error
-
-    func customMiddleware(ctx *gweb.WebContext)error{
-     return nil
-    }
+     func(ctx *gweb.WebContext) error
+    
+        func customMiddleware(ctx *gweb.WebContext)error{
+         return nil
+        }
 
 **Adding a middleware**
 
@@ -63,54 +59,52 @@ Any function with the following signature can be used as middleware:
 
 **Grouping routes**
 
-    v1 := web.Group("/v1")
-    
-    v1.Use(getTime)
-    
-    v1.Get("/hell", sayHelloV1)
-    
-    v1.Post("/user", postUser)
+       v1 := web.Group("/v1")
+        
+        v1.Use(getTime)
+        
+        v1.Get("/hell", sayHelloV1)
+        
+        v1.Post("/user", postUser)
 
 Any function with the following signature is a Handler
 
 **Running the webserver**
 
-    web.Run(":8080")
+      web.Run(":8080")
 
 **Sending a string as response**
 
- func sayHelloV1(ctx *gweb.WebContext) error {
-
- //Get path value
-
- ctx.WebLog.Info(ctx.GetPathValue(key))
-
- //Get Query param
-
- ctx.WebLog.Info(ctx.GetParam(key))
-
-  
-
- ctx.Status(200).SendString("Hello World")
-
- return nil
-
- }
+    func sayHelloV1(ctx *gweb.WebContext) error {
+    
+     //Get path value
+    
+     ctx.WebLog.Info(ctx.GetPathValue(key))
+    
+     //Get Query param
+    
+     ctx.WebLog.Info(ctx.GetParam(key))
+    
+      
+    
+     ctx.Status(200).SendString("Hello World")
+    
+     return nil
+    
+     }
 
 **Sending JSON**
 
- func getUser(ctx *gweb.WebContext) error {
-
- usr := new(User)
-
- ctx.ParseBody(usr)
-
-  
-
- ctx.WebLog.Info("Data","user",usr)
-
- ctx.JSON(usr)
-
- return nil
-
- }
+    func getUser(ctx *gweb.WebContext) error {
+    
+     usr := new(User)
+    
+     ctx.ParseBody(usr)
+    
+     ctx.WebLog.Info("Data","user",usr)
+    
+     ctx.JSON(usr)
+    
+     return nil
+    
+     }
