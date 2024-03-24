@@ -1,42 +1,26 @@
 ```
+** To initialize call gweb.New() **
+web := gweb.New()
 
-web := gweb.New().
-		WithLogging().
-		WithDefaultReaderWriter("localhost:6379", "1")
+**To enable logging**
+web.WithLogging()
 
-	web.Get("/hello", sayHello)
-	web.Use(gweb.MiddlewareJwt("secret"))
-	v1 := web.Group("/v1")
-	v1.Use(getTime)
-	v1.Get("/hell", sayHelloV1)
-	v1.Post("/user", postUser)
+**To use a message stream between two services use the default redis message broker**
 
-	go func() {
-		ticker := time.NewTicker(2 * time.Second)
-		for {
-			select {
-			case <-ticker.C:
+web.WithDefaultReaderWriter("localhost:6379", "1")
 
-				msg, err := web.MessageController.ReadMessageStream()
-				if err == nil {
-					fmt.Println(msg)
-				}
-			}
-		}
-	}()
-	web.Run(":8080")
+Listen to messages in a seperate goroutine with the following syntax
+msg, err := web.MessageController.ReadMessageStream()
 
-    func getTime(ctx *gweb.WebContext) error {
+In a seperate gweb service you can push messages wiht the followin syntax:
 
-	log.Println(time.Now())
-	return nil
-}
-func sayHelloV1(ctx *gweb.WebContext) error {
-	ctx.WebLog.Info(ctx.Request.URL.Path)
+web.PostMessage("uniqueWebID","data")
 
-	ctx.Status(400).SendString("BAD")
-	return nil
-}
+** Handler type **
+**func(ctx *gweb.WebContext) error**
+
+For example : 
+
 func sayHello(ctx *gweb.WebContext) error {
 	ctx.WebLog.Info(ctx.Request.URL.Path)
 
@@ -44,14 +28,56 @@ func sayHello(ctx *gweb.WebContext) error {
 	return nil
 }
 
-func postUser(ctx *gweb.WebContext) error {
-	fmt.Println("id:", ctx.Request.Header.Get("id"))
+**Adding a handler**
+**web.Get("/hello", sayHello)**
+
+** Adding a middleware **
+gweb provides a default middleware for handleing JWT authenitcation. You can use it with the following syntax:
+**web.Use(gweb.MiddlewareJwt("secret"))**
+
+**Custom middleware**
+Any function with the following signature can be used as middleware:
+**func(ctx *gweb.WebContext) error**
+func customMiddleware(ctx *gweb.WebContext)error{
+
+}
+**Adding a middleware**
+web.Use(customMiddleware)
+
+**Grouping routes**
+v1 := web.Group("/v1")
+v1.Use(getTime)
+v1.Get("/hell", sayHelloV1)
+v1.Post("/user", postUser)
+
+Any function with the following signature is a Handler
+
+**Running the webserver**
+web.Run(":8080")
+
+
+**Sending a string as response**
+func sayHelloV1(ctx *gweb.WebContext) error {
+    //Get path value
+	ctx.WebLog.Info(ctx.GetPathValue(key))
+    //Get Query param
+    ctx.WebLog.Info(ctx.GetParam(key))
+
+	ctx.Status(200).SendString("Hello World")
+	return nil
+}	
+
+**Sending JSON**
+
+func getUser(ctx *gweb.WebContext) error {
+	
 	usr := new(User)
 	ctx.ParseBody(usr)
 
-	fmt.Println(usr)
+	ctx.WebLog.Info("Data","user",usr)
 	ctx.JSON(usr)
 	return nil
 }
+
 
 ```
