@@ -29,7 +29,7 @@ func New() *Web {
 			httpServer:  httpServer,
 			middlewares: make([]WebHandler, 0),
 			router:      router,
-			WebLog:      slog.New(slog.NewTextHandler(os.Stdout, nil)),
+			WebLog:      slog.New(slog.NewJSONHandler(os.Stdout, nil)),
 		}
 	})()
 
@@ -129,7 +129,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 		} else if w.custMethods != nil || w.customHeader != nil {
 			middlewareCorsCustom(wc, w.customHeader, w.custMethods)
 		}
-		w.WebLog.Info("calling f")
+
 		err := f(wc)
 		if err != nil {
 			wc.SendError(err)
