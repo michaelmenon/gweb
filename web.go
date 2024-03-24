@@ -2,13 +2,13 @@ package gweb
 
 import (
 	"errors"
-	"log"
+
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
-	"golang.org/x/exp/slog"
+	"github.com/rs/zerolog/log"
 )
 
 func New() *Web {
@@ -26,13 +26,9 @@ func New() *Web {
 			httpServer:  httpServer,
 			middlewares: make([]WebHandler, 0),
 			router:      router,
-			webLog:      slog.Default(),
 		}
 	})()
 	return w
-}
-func (w *Web) Logger() *slog.Logger {
-	return w.webLog
 }
 
 // enable global logging for all the routes
@@ -64,7 +60,7 @@ func (w *Web) WithDefaultReaderWriter(redisHost string, webId string) *Web {
 	rdb, err := newRedisStream(redisHost)
 	if err != nil {
 
-		log.Fatal("unable to connect to redis ", err)
+		log.Error().Err(err).Msg("no redis server found")
 		return w
 	}
 	redisWebStream := &webRedisStream{
@@ -85,20 +81,12 @@ func (w *Web) WithMessageReaderWriter(client GwebMessageReaderWriter) *Web {
 	return w
 }
 
-// GetLogger ... call it if you need a build in web logger or use your own
-func GetWebLogger() (*slog.Logger, error) {
-	if w == nil {
-		return nil, errors.New(WebNotInitialized)
-	}
-	return w.webLog, nil
-}
-
 // Run ... create a HTTP server and runs it on the host address provided
 // host ... it should be in the "ip:port" format
 // returns any error thorwn by the http server
 func (w *Web) Run(host string) error {
 	w.httpServer.Addr = host
-	w.webLog.Info("Running Gweb server on " + host)
+	log.Info().Str("host", host).Msg("Running Gweb server")
 	return w.httpServer.ListenAndServe()
 
 }
@@ -108,8 +96,6 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 
 	wc := &WebContext{
 		middlewares: make([]WebHandler, len(w.middlewares)),
-
-		WebLog: w.webLog,
 	}
 	//save the middlewares that needs to be called for this route
 	copy(wc.middlewares, w.middlewares)
@@ -121,7 +107,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 
 			e := r(wc)
 			if e != nil {
-				w.webLog.Error("middleware error", "err", e)
+				log.Error().Err(e).Msg("middleware error")
 				if errors.Is(e, ExpiredToken{}) || errors.Is(e, InvalidToken{}) {
 					http.Error(wr, e.Error(), http.StatusUnauthorized)
 				} else {
@@ -167,7 +153,8 @@ func (w *Web) Group(pattern string) *WebGroup {
 		middlewares: make([]WebHandler, 0),
 	}
 	if !strings.HasPrefix(pattern, "/") {
-		log.Fatal(InvalidPath)
+		log.Error().Msg("Invalid path")
+		log.Fatal()
 	}
 
 	w.router.Handle("/", v.router)

@@ -3,8 +3,6 @@ package gweb
 import (
 	"net/http"
 	"net/url"
-
-	"golang.org/x/exp/slog"
 )
 
 // a web handler type
@@ -18,8 +16,8 @@ type Web struct {
 	//an http server
 	httpServer  *http.Server
 	middlewares []WebHandler
-	webLog      *slog.Logger
-	router      *http.ServeMux
+
+	router *http.ServeMux
 	// a client which implement GwebMessageReaderWriter for message passing and receiving
 	MessageController GwebMessageReaderWriter
 	//enable Gloabl logging
@@ -47,7 +45,6 @@ type WebContext struct {
 	//set by the handler
 	ReplyStatus int
 	middlewares []WebHandler
-	WebLog      *slog.Logger
 }
 
 // GwebMessage received for this Gweb Service

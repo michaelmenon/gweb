@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/rs/zerolog/log"
 )
 
 type InvalidToken struct{}
@@ -25,7 +26,7 @@ func (it ExpiredToken) Error() string {
 // internally we use slog
 func middlewareLogger(ctx *WebContext) {
 	logMsg := fmt.Sprintf("%d %s %s %s", ctx.ReplyStatus, ctx.Request.Host, ctx.Request.Method, ctx.Request.URL.Path)
-	ctx.WebLog.Info(logMsg)
+	log.Info().Msg(logMsg)
 }
 
 // JWT ... a jwt middleware to authenitcate the incoing request
