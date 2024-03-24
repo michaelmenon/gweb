@@ -165,6 +165,7 @@ func (w *Web) Group(pattern string) *WebGroup {
 	if !strings.HasPrefix(pattern, "/") {
 		log.Fatal(InvalidPath)
 	}
+	copy(v.middlewares, w.middlewares)
 	w.router.Handle("/", v.router)
 	return &v
 }

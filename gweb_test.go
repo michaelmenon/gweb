@@ -201,6 +201,7 @@ func TestCors(t *testing.T) {
 func TestCustomCors(t *testing.T) {
 
 	web := New().WithCustomCors([]string{"GET"}, []string{"Content-Type", "Authorization"})
+
 	web.Get("/world", func(ctx *WebContext) error {
 
 		ctx.Status(200).SendString("Hello, world!")
