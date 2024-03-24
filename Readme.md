@@ -18,11 +18,11 @@
 
 **To enable default CORS**
 
-`web := New().WithDefaultCors()`
+`web := gweb.New().WithDefaultCors()`
 
 **To Use Custom Cors**
 
-`web := New().WithCustomCors([]string{"GET"}, []string{"Content-Type", "Authorization"})`
+`web := gweb.New().WithCustomCors([]string{"GET"}, []string{"Content-Type", "Authorization"})`
 
 **To initialize with logging**
 `web := gweb.New().WithLogging()`
