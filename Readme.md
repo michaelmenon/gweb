@@ -117,7 +117,10 @@ Any function with the following signature can be used as middleware:
     
      usr := new(User)
     
-     ctx.ParseBody(usr)
+     if err:= ctx.ParseBody(usr);err!=nil{
+        ctx.WebLog.Error("Body Parsing","parse error",err)
+        return err
+     }
     
      ctx.WebLog.Info("Data","user",usr)
     
