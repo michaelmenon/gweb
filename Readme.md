@@ -9,7 +9,7 @@
 
     web.WithLogging()
 
-**To use a message stream between two services use the default redis message broker**
+**To use a message stream between two services use the default redis message broker provided**
 
     web.WithDefaultReaderWriter("localhost:6379", "1")
 
@@ -17,7 +17,7 @@ Listen to messages in a seperate goroutine with the following syntax
 
     msg, err := web.MessageController.ReadMessageStream()
 
-In a seperate gweb service you can push messages wiht the followin syntax:
+In a seperate gweb service you can push messages with the followin syntax:
 
     web.PostMessage("uniqueWebID","data")
 
