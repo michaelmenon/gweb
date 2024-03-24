@@ -228,3 +228,32 @@ func TestCustomCors(t *testing.T) {
 			rr.Body.String(), expected)
 	}
 }
+
+// go test -v -run TestGroupMiddleware
+func TestGroupMiddleware(t *testing.T) {
+
+	web := New()
+	web.Use(MiddlewareJwt("secret"))
+	v1 := web.Group("/v1")
+
+	v1.Get("/world", func(ctx *WebContext) error {
+
+		ctx.Status(200).SendString("Hello, world!")
+		return nil
+	})
+	// Create a new HTTP request to the handler function
+	req, err := http.NewRequest("GET", "/v1/world", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Create a ResponseRecorder to record the response
+	rr := httptest.NewRecorder()
+	web.WebTest(rr, req)
+
+	// Check the response status code
+	if status := rr.Code; status != http.StatusUnauthorized {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusUnauthorized)
+	}
+
+}

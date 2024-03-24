@@ -121,8 +121,11 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 
 			e := r(wc)
 			if e != nil {
-
-				http.Error(wr, e.Error(), http.StatusBadRequest)
+				if errors.Is(e, ExpiredToken{}) || errors.Is(e, InvalidToken{}) {
+					http.Error(wr, e.Error(), http.StatusUnauthorized)
+				} else {
+					http.Error(wr, e.Error(), http.StatusBadRequest)
+				}
 				return
 			}
 		}
@@ -165,7 +168,7 @@ func (w *Web) Group(pattern string) *WebGroup {
 	if !strings.HasPrefix(pattern, "/") {
 		log.Fatal(InvalidPath)
 	}
-	copy(v.middlewares, w.middlewares)
+
 	w.router.Handle("/", v.router)
 	return &v
 }
