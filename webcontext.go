@@ -65,7 +65,7 @@ func (wc *WebContext) JSON(data any) error {
 	if wc.ReplyStatus == 0 {
 		wc.ReplyStatus = http.StatusOK
 	}
-	wc.Writer.WriteHeader(wc.ReplyStatus)
+	//wc.Writer.WriteHeader(wc.ReplyStatus)
 	err := encoder.Encode(data)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (wc *WebContext) SendString(data string, contentType ...string) error {
 	if wc.ReplyStatus == 0 {
 		wc.ReplyStatus = http.StatusOK
 	}
-	wc.Writer.WriteHeader(wc.ReplyStatus)
+	//wc.Writer.WriteHeader(wc.ReplyStatus)
 	var err error
 
 	_, err = io.Copy(wc.Writer, strings.NewReader(data))
@@ -101,7 +101,7 @@ func (wc *WebContext) SendBytes(data []byte) error {
 	if wc.ReplyStatus == 0 {
 		wc.ReplyStatus = http.StatusOK
 	}
-	wc.Writer.WriteHeader(wc.ReplyStatus)
+	//wc.Writer.WriteHeader(wc.ReplyStatus)
 	var err error
 
 	_, err = io.Copy(wc.Writer, bytes.NewReader(data))

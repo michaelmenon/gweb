@@ -47,7 +47,6 @@ type WebContext struct {
 	query   url.Values
 	//set by the handler
 	ReplyStatus int
-	middlewares []WebHandler
 	WebLog      *zerolog.Logger
 }
 

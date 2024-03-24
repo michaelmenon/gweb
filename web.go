@@ -96,17 +96,18 @@ func (w *Web) Run(host string) error {
 // addRoutes ... adds the route to the default mux
 func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 
-	wc := &WebContext{
-		middlewares: make([]WebHandler, len(w.middlewares)),
-		WebLog:      w.WebLog,
-	}
-	//save the middlewares that needs to be called for this route
-	copy(wc.middlewares, w.middlewares)
+	middlewares := make([]WebHandler, 0)
+	copy(middlewares, w.middlewares)
 	handler := func(wr http.ResponseWriter, r *http.Request) {
+		wc := &WebContext{
+
+			WebLog: w.WebLog,
+		}
+		//save the middlewares that needs to be called for this route
 
 		wc.Request = r
 		wc.Writer = wr
-		for _, r := range wc.middlewares {
+		for _, r := range middlewares {
 
 			e := r(wc)
 			if e != nil {
@@ -138,7 +139,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 		}
 	}
 	if len(wg) > 0 {
-		wc.middlewares = append(wc.middlewares, wg[0].middlewares...)
+		middlewares = append(middlewares, wg[0].middlewares...)
 		wg[0].router.HandleFunc(pattern, handler)
 
 	} else {
