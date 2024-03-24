@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"html/template"
 	"io"
 	"net/http"
 	"strings"
@@ -72,7 +73,7 @@ func (wc *WebContext) JSON(data any) error {
 }
 
 // SendString ... send the text data
-func (wc *WebContext) SendString(data string, contentType ...string) error {
+func (wc *WebContext) SendString(data *strings.Reader, contentType ...string) error {
 
 	// Set the Content-Type header to application/json
 	if len(contentType) == 0 {
@@ -86,13 +87,13 @@ func (wc *WebContext) SendString(data string, contentType ...string) error {
 	//wc.Writer.WriteHeader(wc.ReplyStatus)
 	var err error
 
-	_, err = io.Copy(wc.Writer, strings.NewReader(data))
+	_, err = io.Copy(wc.Writer, data)
 
 	return err
 }
 
 // SendString ... send the text data
-func (wc *WebContext) SendBytes(data []byte) error {
+func (wc *WebContext) SendBytes(data *bytes.Reader) error {
 
 	// Set the Content-Type header to application/json
 	wc.Writer.Header().Set("Content-Type", "application/octet-stream")
@@ -102,13 +103,35 @@ func (wc *WebContext) SendBytes(data []byte) error {
 	//wc.Writer.WriteHeader(wc.ReplyStatus)
 	var err error
 
-	_, err = io.Copy(wc.Writer, bytes.NewReader(data))
+	_, err = io.Copy(wc.Writer, data)
 
 	return err
 }
 
 // Render ... render the html data
-func (wc *WebContext) Render(data string) error {
+func (wc *WebContext) RenderString(data *strings.Reader) error {
 
 	return wc.SendString(data, "text/html; charset=utf-8")
+}
+
+// RenderFile ... render a file with data using go template
+// filePattern ... is a path ot specifc file types like all the htmls in template folder
+// filePattern will be template/*.html
+// data provide the Data that needs to be passed to the head file
+// headFile is the file that is the start of the view for example index.html
+// funcMap ... pass any function map that needs to be passed, it is optional
+func (wc *WebContext) RenderFiles(filePattern string, data any, headFile string, funcMap template.FuncMap) error {
+
+	templ, err := template.ParseGlob(filePattern)
+	if err != nil {
+		return err
+	}
+	if funcMap != nil {
+		templ.Funcs(funcMap)
+	}
+
+	// Execute the "index.html" template
+	err = templ.ExecuteTemplate(wc.Writer, headFile, data)
+
+	return err
 }

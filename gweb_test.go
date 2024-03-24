@@ -2,8 +2,10 @@ package gweb
 
 import (
 	"encoding/json"
+	"html/template"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -15,7 +17,7 @@ func TestGet(t *testing.T) {
 	web := New()
 	web.Get("/world", func(ctx *WebContext) error {
 
-		ctx.Status(200).SendString("Hello, world!")
+		ctx.Status(200).SendString(strings.NewReader("Hello, world!"))
 		return nil
 	})
 	// Create a new HTTP request to the handler function
@@ -46,7 +48,7 @@ func TestPost(t *testing.T) {
 	web := New()
 	web.Post("/save", func(ctx *WebContext) error {
 
-		ctx.Status(200).SendString("Ok")
+		ctx.Status(200).SendString(strings.NewReader("OK"))
 		return nil
 	})
 	// Create a new HTTP request to the handler function
@@ -64,7 +66,7 @@ func TestPost(t *testing.T) {
 			status, http.StatusOK)
 	}
 	// Check the response body
-	expected := "Ok"
+	expected := "OK"
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
@@ -77,7 +79,7 @@ func TestWrongMethod(t *testing.T) {
 	web := New()
 	web.Post("/save", func(ctx *WebContext) error {
 
-		ctx.Status(200).SendString("Ok")
+		ctx.Status(200).SendString(strings.NewReader("OK"))
 		return nil
 	})
 	// Create a new HTTP request to the handler function
@@ -103,7 +105,7 @@ func TestWrongRoute(t *testing.T) {
 	web := New()
 	web.Post("/save", func(ctx *WebContext) error {
 
-		ctx.Status(200).SendString("Ok")
+		ctx.Status(200).SendString(strings.NewReader("OK"))
 		return nil
 	})
 	// Create a new HTTP request to the handler function
@@ -172,7 +174,7 @@ func TestCors(t *testing.T) {
 	web := New().WithDefaultCors()
 	web.Get("/world", func(ctx *WebContext) error {
 
-		ctx.Status(200).SendString("Hello, world!")
+		ctx.Status(200).SendString(strings.NewReader("Hello, world!"))
 		return nil
 	})
 	// Create a new HTTP request to the handler function
@@ -204,7 +206,7 @@ func TestCustomCors(t *testing.T) {
 
 	web.Get("/world", func(ctx *WebContext) error {
 
-		ctx.Status(200).SendString("Hello, world!")
+		ctx.Status(200).SendString(strings.NewReader("Hello, world!"))
 		return nil
 	})
 	// Create a new HTTP request to the handler function
@@ -238,7 +240,7 @@ func TestGroupMiddleware(t *testing.T) {
 
 	v1.Get("/world", func(ctx *WebContext) error {
 
-		ctx.Status(200).SendString("Hello, world!")
+		ctx.Status(200).SendString(strings.NewReader("OK"))
 		return nil
 	})
 	// Create a new HTTP request to the handler function
@@ -256,4 +258,35 @@ func TestGroupMiddleware(t *testing.T) {
 			status, http.StatusOK)
 	}
 
+}
+
+func TestRenderFiles(t *testing.T) {
+	web := New()
+
+	funcMap := template.FuncMap{
+		"upper": func(s string) string {
+			return strings.ToUpper(s)
+		}, // Register the custom "upper" function
+	}
+	//web.Use(MiddlewareJwt("secret"))
+	web.Get("/index", func(ctx *WebContext) error {
+
+		ctx.Status(200).RenderFiles("templates/*.html", "World!", "index.html", funcMap)
+		return nil
+	})
+
+	// Create a new HTTP request to the handler function
+	req, err := http.NewRequest("GET", "/index", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Create a ResponseRecorder to record the response
+	rr := httptest.NewRecorder()
+	web.WebTest(rr, req)
+
+	// Check the response status code
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
 }
