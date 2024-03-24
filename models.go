@@ -22,7 +22,14 @@ type Web struct {
 	router      *http.ServeMux
 	// a client which implement GwebMessageReaderWriter for message passing and receiving
 	MessageController GwebMessageReaderWriter
-	logging           bool
+	//enable Gloabl logging
+	logging bool
+	//enable cors support for all the routes
+	defaultCors bool
+
+	//if we need custom cors headers and methods support
+	customHeader []string
+	custMethods  []string
 }
 
 type WebGroup struct {

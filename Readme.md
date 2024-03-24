@@ -16,6 +16,14 @@
 
     web.WithLogging()
 
+**To enable default CORS**
+
+`web := New().WithDefaultCors()`
+
+**To Use Custom Cors**
+
+`web := New().WithCustomCors([]string{"GET"}, []string{"Content-Type", "Authorization"})`
+
 **To initialize with logging**
 `web := gweb.New().WithLogging()`
 
@@ -133,7 +141,7 @@ Any function with the following signature can be used as middleware:
 func index(ctx *gweb.WebContext) error {
     ctx.WebLog.Info("Index html")
 
-    ctx.Render(<h1>Hello</h1>)
+    ctx.Render("<h1>Hello</h1>")
     return nil
 }
 ```

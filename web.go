@@ -41,6 +41,23 @@ func (w *Web) WithLogging() *Web {
 	return w
 }
 
+// enable default cors
+func (w *Web) WithDefaultCors() *Web {
+	w.defaultCors = true
+	return w
+}
+
+// apply CORS with custom headers and methods
+func (w *Web) WithCustomCors(headers []string, methods []string) *Web {
+	if headers != nil {
+		w.customHeader = headers
+	}
+	if methods != nil {
+		w.customHeader = methods
+	}
+	return w
+}
+
 // WithDefaultReaderWriter ... use the default Redis reader writer for message passing between services
 func (w *Web) WithDefaultReaderWriter(redisHost string, webId string) *Web {
 
@@ -108,6 +125,12 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 				http.Error(wr, e.Error(), http.StatusBadRequest)
 				return
 			}
+		}
+		if w.defaultCors {
+			//write cors headers
+			middlewareCorsDefault(wc)
+		} else if w.custMethods != nil || w.customHeader != nil {
+			middlewareCorsCustom(wc, w.customHeader, w.custMethods)
 		}
 		err := f(wc)
 		if err != nil {
