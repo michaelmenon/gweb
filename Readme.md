@@ -37,13 +37,14 @@ For example :
 
 **Adding a handler**
 
-**web.Get("/hello", sayHello)**
+`web.Get("/hello", sayHello)`
+`web.Post("/getUser",userHandler)`
 
 **Adding a middleware**
 
-gweb provides a default middleware for handleing JWT authenitcation. You can use it with the following syntax:
+gweb provides a default middleware for handling JWT authenitcation. You can use it with the following syntax:
 
-**web.Use(gweb.MiddlewareJwt("secret"))**
+`web.Use(gweb.MiddlewareJwt("secret"))`
 
 **Custom middleware**
 
