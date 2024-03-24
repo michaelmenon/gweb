@@ -58,11 +58,13 @@ For example :
 Supported HTTP Verbs:
 **GET POST PUT DELETE OPTIONS PATCH**
 
-**Adding a middleware**
+**Default Middleware**
 
-gweb provides a default middleware for handling JWT authenitcation. You can use it with the following syntax:
+1. gweb provides a default middleware for handling JWT authenitcation. You can use it with the following syntax:
 
 `web.Use(gweb.MiddlewareJwt("secret"))`
+
+More are planned
 
 **Custom middleware**
 
