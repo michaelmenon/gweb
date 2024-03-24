@@ -30,11 +30,19 @@ In a seperate gweb service you can push messages with the followin syntax:
 For example :
 
        func sayHello(ctx *gweb.WebContext) error {
-         ctx.WebLog.Info(ctx.Request.URL.Path)
-         ctx.Status(400).SendString("BAD")
+         ctx.WebLog.Info(ctx.GetPathValue(key))
+         ctx.Status(200).SendString("OK")
          return nil
         }
 
+**Render HTML**
+
+`func index(ctx *gweb.WebContext) error {
+ ctx.WebLog.Info("Index html")
+
+ ctx.Render(<h1>Hello</h1>)
+ return nil`
+}
 **Adding a handler**
 
 `web.Get("/hello", sayHello)`
