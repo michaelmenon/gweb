@@ -14,7 +14,7 @@
     web.WithLogging()
 
 **To initialize with logging**
-web := gweb.New().WithLogging()
+`web := gweb.New().WithLogging()`
 
 **To use a message stream between two services use the default redis message broker provided**
 
