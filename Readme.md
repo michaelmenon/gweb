@@ -37,12 +37,15 @@ For example :
 
 **Render HTML**
 
-`func index(ctx *gweb.WebContext) error {
- ctx.WebLog.Info("Index html")
+```
+func index(ctx *gweb.WebContext) error {
+    ctx.WebLog.Info("Index html")
 
- ctx.Render(<h1>Hello</h1>)
- return nil`
+    ctx.Render(<h1>Hello</h1>)
+    return nil
 }
+```
+
 **Adding a handler**
 
 `web.Get("/hello", sayHello)`
