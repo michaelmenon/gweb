@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -29,6 +30,10 @@ func New() *Web {
 		}
 	})()
 	return w
+}
+
+func (wc *Web) WebLog() zerolog.Logger {
+	return log.Logger
 }
 
 // enable global logging for all the routes

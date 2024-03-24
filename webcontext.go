@@ -7,7 +7,14 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+func (wc *WebContext) WebLog() zerolog.Logger {
+	return log.Logger
+}
 
 // get the query parameter
 func (wc *WebContext) GetParam(key string) string {
