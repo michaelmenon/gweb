@@ -204,3 +204,10 @@ func (w *Web) Patch(pattern string, f WebHandler) error {
 	w.addRoutes(http.MethodPatch+" "+pattern, f)
 	return nil
 }
+
+//for writing unit test
+
+func (w *Web) WebTest(wr http.ResponseWriter, r *http.Request) {
+	w.router.ServeHTTP(wr, r)
+
+}
