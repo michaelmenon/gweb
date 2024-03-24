@@ -80,7 +80,7 @@ Any function with the following signature can be used as middleware:
 **Grouping routes**
 
        v1 := web.Group("/v1")
-        
+        //getTime is a custom middleware specifically for routes under v1
         v1.Use(getTime)
         
         v1.Get("/hell", sayHelloV1)
