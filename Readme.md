@@ -108,9 +108,9 @@ Any function with the following signature can be used as middleware:
     func sayHelloV1(ctx *gweb.WebContext) error {
     
      //Get path value
-     ctx.WebLog.Info().Msg(ctx.GetPathValue(key))
+     ctx.WebLog.Info(ctx.GetPathValue(key))
      //Get Query param
-     ctx.WebLog.Info().Msg(ctx.GetParam(key))
+     ctx.WebLog.Info(ctx.GetParam(key))
 
      ctx.Status(200).SendString(strings.NewReader("Hello World")) 
      return nil
@@ -139,7 +139,7 @@ Any function with the following signature can be used as middleware:
 
 ```
 func index(ctx *gweb.WebContext) error {
-    ctx.WebLog.Info().Msg("Index html")
+    ctx.WebLog.Info("Index html")
 
     ctx.RenderString(string.NewReader("<h1>Hello</h1>"))
     return nil

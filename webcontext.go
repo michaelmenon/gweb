@@ -121,13 +121,18 @@ func (wc *WebContext) RenderString(data *strings.Reader) error {
 // headFile is the file that is the start of the view for example index.html
 // funcMap ... pass any function map that needs to be passed, it is optional
 func (wc *WebContext) RenderFiles(filePattern string, data any, headFile string, funcMap template.FuncMap) error {
-
-	templ, err := template.ParseGlob(filePattern)
-	if err != nil {
-		return err
-	}
+	templ := template.New("new")
+	var err error
 	if funcMap != nil {
-		templ.Funcs(funcMap)
+		templ, err = templ.Funcs(funcMap).ParseGlob(filePattern)
+		if err != nil {
+			return err
+		}
+	} else {
+		templ, err = templ.ParseGlob(filePattern)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Execute the "index.html" template

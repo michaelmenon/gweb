@@ -2,13 +2,15 @@ package gweb
 
 import (
 	"errors"
+	"os"
 
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/rs/zerolog"
+	"log/slog"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,9 +29,10 @@ func New() *Web {
 			httpServer:  httpServer,
 			middlewares: make([]WebHandler, 0),
 			router:      router,
-			WebLog:      &zerolog.Logger{},
+			WebLog:      slog.New(slog.NewTextHandler(os.Stdout, nil)),
 		}
 	})()
+
 	return w
 }
 
@@ -62,7 +65,7 @@ func (w *Web) WithDefaultReaderWriter(redisHost string, webId string) *Web {
 	rdb, err := newRedisStream(redisHost)
 	if err != nil {
 
-		log.Error().Err(err).Msg("no redis server found")
+		w.WebLog.Error("no redis server found")
 		return w
 	}
 	redisWebStream := &webRedisStream{
@@ -88,7 +91,7 @@ func (w *Web) WithMessageReaderWriter(client GwebMessageReaderWriter) *Web {
 // returns any error thorwn by the http server
 func (w *Web) Run(host string) error {
 	w.httpServer.Addr = host
-	log.Info().Str("host", host).Msg("Running Gweb server")
+	w.WebLog.Info("Running Gweb server", "host", host)
 	return w.httpServer.ListenAndServe()
 
 }
@@ -126,6 +129,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 		} else if w.custMethods != nil || w.customHeader != nil {
 			middlewareCorsCustom(wc, w.customHeader, w.custMethods)
 		}
+		w.WebLog.Info("calling f")
 		err := f(wc)
 		if err != nil {
 			wc.SendError(err)
@@ -143,6 +147,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 		wg[0].router.HandleFunc(pattern, handler)
 
 	} else {
+		w.WebLog.Info("adding pattern", "pattern", pattern)
 		w.router.HandleFunc(pattern, handler)
 	}
 
@@ -175,6 +180,7 @@ func (w *Web) Get(pattern string, f WebHandler) error {
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
+
 	w.addRoutes(http.MethodGet+" "+pattern, f)
 	return nil
 }

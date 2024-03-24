@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/rs/zerolog"
+	"log/slog"
 )
 
 // a web handler type
@@ -30,7 +30,7 @@ type Web struct {
 	//if we need custom cors headers and methods support
 	customHeader []string
 	custMethods  []string
-	WebLog       *zerolog.Logger
+	WebLog       *slog.Logger
 }
 
 type WebGroup struct {
@@ -47,7 +47,7 @@ type WebContext struct {
 	query   url.Values
 	//set by the handler
 	ReplyStatus int
-	WebLog      *zerolog.Logger
+	WebLog      *slog.Logger
 }
 
 // GwebMessage received for this Gweb Service
