@@ -49,7 +49,7 @@ For example :
 
        func sayHello(ctx *gweb.WebContext) error {
          ctx.WebLog.Info(ctx.GetPathValue(key))
-         ctx.Status(200).SendString("OK")
+         ctx.Status(200).SendString(strings.NewReader("OK"))
          return nil
         }
 

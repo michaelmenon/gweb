@@ -67,7 +67,7 @@ func (wc *WebContext) JSON(data any) error {
 	//wc.Writer.WriteHeader(wc.ReplyStatus)
 	err := encoder.Encode(data)
 	if err != nil {
-		return err
+		wc.WebLog.Error("sending json", "WebErr", err)
 	}
 	return nil
 }
@@ -88,8 +88,10 @@ func (wc *WebContext) SendString(data *strings.Reader, contentType ...string) er
 	var err error
 
 	_, err = io.Copy(wc.Writer, data)
-
-	return err
+	if err != nil {
+		wc.WebLog.Error("sending string", "WebErr", err)
+	}
+	return nil
 }
 
 // SendString ... send the text data
@@ -104,8 +106,10 @@ func (wc *WebContext) SendBytes(data *bytes.Reader) error {
 	var err error
 
 	_, err = io.Copy(wc.Writer, data)
-
-	return err
+	if err != nil {
+		wc.WebLog.Error("sending bytes", "WebErr", err)
+	}
+	return nil
 }
 
 // Render ... render the html data
@@ -137,6 +141,8 @@ func (wc *WebContext) RenderFiles(filePattern string, data any, headFile string,
 
 	// Execute the "index.html" template
 	err = templ.ExecuteTemplate(wc.Writer, headFile, data)
-
-	return err
+	if err != nil {
+		wc.WebLog.Error("executing template", "WebErr", err)
+	}
+	return nil
 }

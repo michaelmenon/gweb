@@ -147,7 +147,6 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 		wg[0].router.HandleFunc(pattern, handler)
 
 	} else {
-		w.WebLog.Info("adding pattern", "pattern", pattern)
 		w.router.HandleFunc(pattern, handler)
 	}
 
