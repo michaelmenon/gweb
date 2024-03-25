@@ -20,8 +20,7 @@ type Web struct {
 	middlewares []WebHandler
 
 	router *http.ServeMux
-	// a client which implement GwebMessageReaderWriter for message passing and receiving
-	MessageController GwebMessageReaderWriter
+
 	//enable Gloabl logging
 	logging bool
 	//enable cors support for all the routes
