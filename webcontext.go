@@ -8,8 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/gorilla/websocket"
 )
 
 // get the query parameter
@@ -118,73 +116,6 @@ func (wc *WebContext) SendBytes(data *bytes.Reader) error {
 		wc.WebLog.Error("sending bytes", "WebErr", err)
 	}
 	return nil
-}
-
-// WriteByteToSocket .. write byte data to active websocket connection
-func (wc *WebContext) WriteByteToSocket(data []byte) error {
-	if data == nil {
-
-		return errors.New(InvalidData)
-	}
-	if wc.webConn != nil {
-		return wc.webConn.WriteMessage(websocket.BinaryMessage, data)
-
-	}
-	return errors.New(NoWebSocket)
-}
-
-// WriteTextToSocket .. write text data to active websocket connection
-func (wc *WebContext) WriteTextToSocket(data string) error {
-	if wc.webConn != nil {
-		return wc.webConn.WriteMessage(websocket.TextMessage, []byte(data))
-
-	}
-	return errors.New(NoWebSocket)
-}
-
-// WriteJsonToSocket .. write Jsob data to active websocket connection
-func (wc *WebContext) WriteJsonToSocket(data any) error {
-	if data == nil {
-
-		return errors.New(InvalidData)
-	}
-	if wc.webConn != nil {
-		return wc.webConn.WriteJSON(data)
-
-	}
-	return errors.New(NoWebSocket)
-}
-
-// ReadSocketData ... read the websocket data if its connected
-func (wc *WebContext) ReadJsonFromSocket(v any) error {
-	if v == nil {
-
-		return errors.New(InvalidData)
-	}
-
-	if wc.webConn != nil {
-		return wc.webConn.ReadJSON(v)
-	}
-	return errors.New(NoWebSocket)
-}
-
-// ReadSocketData ... read the websocket data if its connected
-func (wc *WebContext) ReadMessageFromSocket() (MessageType, []byte, error) {
-
-	if wc.webConn != nil {
-		mType, b, err := wc.webConn.ReadMessage()
-		return MessageType(mType), b, err
-	}
-	return 0, nil, errors.New(NoWebSocket)
-}
-
-// CloseSocket ... close the active web socket
-func (wc *WebContext) CloseSocket() error {
-	if wc.webConn != nil {
-		return wc.webConn.Close()
-
-	}
-	return errors.New(NoWebSocket)
 }
 
 // Render ... render the html data

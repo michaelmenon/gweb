@@ -98,58 +98,6 @@ func (w *Web) Run(host string) error {
 
 }
 
-// addRaddSocketRoute... adds the route for the websocket route
-func (w *Web) addSocketRoute(pattern string, f WebHandler) {
-
-	if f == nil {
-		return
-	}
-	middlewares := make([]WebHandler, 0)
-	copy(middlewares, w.middlewares)
-	handler := func(wr http.ResponseWriter, r *http.Request) {
-		if wr == nil || r == nil {
-			return
-		}
-		//do the upgrade to websocket
-		conn, err := upgrader.Upgrade(wr, r, nil)
-		if err != nil {
-			w.WebLog.Error("Websocket upgrade", "Error", err)
-			return
-		}
-		wc := &WebContext{
-
-			WebLog:  w.WebLog,
-			webConn: conn,
-		}
-		for _, r := range middlewares {
-
-			e := r(wc)
-			if e != nil {
-
-				if errors.Is(e, ExpiredToken{}) || errors.Is(e, InvalidToken{}) {
-					http.Error(wr, e.Error(), http.StatusUnauthorized)
-				} else {
-					http.Error(wr, e.Error(), http.StatusBadRequest)
-				}
-				return
-			}
-		}
-		if w.defaultCors {
-			//write cors headers
-			middlewareCorsDefault(wc)
-		} else if w.custMethods != nil || w.customHeader != nil {
-			middlewareCorsCustom(wc, w.customHeader, w.custMethods)
-		}
-
-		f(wc)
-		if w.logging {
-			middlewareLogger(wc)
-		}
-	}
-	w.router.HandleFunc(pattern, handler)
-
-}
-
 // addRoutes ... adds the route to the default mux
 func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 
@@ -310,18 +258,6 @@ func (w *Web) Patch(pattern string, f WebHandler) error {
 		return errors.New(InvalidPath)
 	}
 	w.addRoutes(http.MethodPatch+" "+pattern, f)
-	return nil
-}
-
-func (w *Web) WebSocket(pattern string, f WebHandler) error {
-	if f == nil {
-		return errors.New(InternalServerError)
-	}
-	if !strings.HasPrefix(pattern, "/") {
-		return errors.New(InvalidPath)
-	}
-
-	w.addSocketRoute(pattern, f)
 	return nil
 }
 
