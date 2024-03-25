@@ -2,6 +2,7 @@ package gweb
 
 import (
 	"errors"
+	"log"
 	"os"
 
 	"net/http"
@@ -10,8 +11,6 @@ import (
 	"time"
 
 	"log/slog"
-
-	"github.com/rs/zerolog/log"
 )
 
 func New() *Web {
@@ -81,7 +80,10 @@ func (w *Web) WithDefaultReaderWriter(redisHost string, webId string) *Web {
 // messageChannel ... the channel to which the messages will be pushed
 // use the context Done channel to indicate if we needs to stop receiving the messages
 func (w *Web) WithMessageReaderWriter(client GwebMessageReaderWriter) *Web {
-	w.MessageController = client
+
+	if client != nil {
+		w.MessageController = client
+	}
 
 	return w
 }
@@ -96,12 +98,70 @@ func (w *Web) Run(host string) error {
 
 }
 
-// addRoutes ... adds the route to the default mux
-func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
+// addRaddSocketRoute... adds the route for the websocket route
+func (w *Web) addSocketRoute(pattern string, f WebHandler) {
 
+	if f == nil {
+		return
+	}
 	middlewares := make([]WebHandler, 0)
 	copy(middlewares, w.middlewares)
 	handler := func(wr http.ResponseWriter, r *http.Request) {
+		if wr == nil || r == nil {
+			return
+		}
+		//do the upgrade to websocket
+		conn, err := upgrader.Upgrade(wr, r, nil)
+		if err != nil {
+			w.WebLog.Error("Websocket upgrade", "Error", err)
+			return
+		}
+		wc := &WebContext{
+
+			WebLog:  w.WebLog,
+			webConn: conn,
+		}
+		for _, r := range middlewares {
+
+			e := r(wc)
+			if e != nil {
+
+				if errors.Is(e, ExpiredToken{}) || errors.Is(e, InvalidToken{}) {
+					http.Error(wr, e.Error(), http.StatusUnauthorized)
+				} else {
+					http.Error(wr, e.Error(), http.StatusBadRequest)
+				}
+				return
+			}
+		}
+		if w.defaultCors {
+			//write cors headers
+			middlewareCorsDefault(wc)
+		} else if w.custMethods != nil || w.customHeader != nil {
+			middlewareCorsCustom(wc, w.customHeader, w.custMethods)
+		}
+
+		f(wc)
+		if w.logging {
+			middlewareLogger(wc)
+		}
+	}
+	w.router.HandleFunc(pattern, handler)
+
+}
+
+// addRoutes ... adds the route to the default mux
+func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
+
+	if f == nil {
+		return
+	}
+	middlewares := make([]WebHandler, 0)
+	copy(middlewares, w.middlewares)
+	handler := func(wr http.ResponseWriter, r *http.Request) {
+		if wr == nil || r == nil {
+			return
+		}
 		wc := &WebContext{
 
 			WebLog: w.WebLog,
@@ -114,7 +174,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 
 			e := r(wc)
 			if e != nil {
-				log.Error().Err(e).Msg("middleware error")
+
 				if errors.Is(e, ExpiredToken{}) || errors.Is(e, InvalidToken{}) {
 					http.Error(wr, e.Error(), http.StatusUnauthorized)
 				} else {
@@ -161,7 +221,7 @@ func (w *Web) Group(pattern string) *WebGroup {
 		middlewares: make([]WebHandler, 0),
 	}
 	if !strings.HasPrefix(pattern, "/") {
-		log.Error().Msg("Invalid path")
+		w.WebLog.Error("Invalid path")
 		log.Fatal()
 	}
 
@@ -171,11 +231,17 @@ func (w *Web) Group(pattern string) *WebGroup {
 
 // add middlewares using Use
 func (w *Web) Use(f WebHandler) {
+	if f == nil {
+		return
+	}
 	w.middlewares = append(w.middlewares, f)
 }
 
 // GET ... adds a GET handler
 func (w *Web) Get(pattern string, f WebHandler) error {
+	if f == nil {
+		return errors.New(InternalServerError)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -186,7 +252,9 @@ func (w *Web) Get(pattern string, f WebHandler) error {
 
 // Post ... adds a POST handler
 func (w *Web) Post(pattern string, f WebHandler) error {
-
+	if f == nil {
+		return errors.New(InternalServerError)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -197,6 +265,9 @@ func (w *Web) Post(pattern string, f WebHandler) error {
 
 // Delete ... adds a DELETE handler
 func (w *Web) Delete(pattern string, f WebHandler) error {
+	if f == nil {
+		return errors.New(InternalServerError)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -206,6 +277,9 @@ func (w *Web) Delete(pattern string, f WebHandler) error {
 
 // Put ... adds a PUT handler
 func (w *Web) Put(pattern string, f WebHandler) error {
+	if f == nil {
+		return errors.New(InternalServerError)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -213,7 +287,12 @@ func (w *Web) Put(pattern string, f WebHandler) error {
 	return nil
 
 }
+
+// Options ... options Verb support
 func (w *Web) Options(pattern string, f WebHandler) error {
+	if f == nil {
+		return errors.New(InternalServerError)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -221,7 +300,12 @@ func (w *Web) Options(pattern string, f WebHandler) error {
 	return nil
 
 }
+
+// Patch ... Patch service
 func (w *Web) Patch(pattern string, f WebHandler) error {
+	if f == nil {
+		return errors.New(InternalServerError)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -229,9 +313,23 @@ func (w *Web) Patch(pattern string, f WebHandler) error {
 	return nil
 }
 
-//for writing unit test
+func (w *Web) WebSocket(pattern string, f WebHandler) error {
+	if f == nil {
+		return errors.New(InternalServerError)
+	}
+	if !strings.HasPrefix(pattern, "/") {
+		return errors.New(InvalidPath)
+	}
 
+	w.addSocketRoute(pattern, f)
+	return nil
+}
+
+// for writing unit test
 func (w *Web) WebTest(wr http.ResponseWriter, r *http.Request) {
+	if wr == nil || r == nil {
+		return
+	}
 	w.router.ServeHTTP(wr, r)
 
 }

@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/websocket"
 )
 
 // get the query parameter
@@ -74,7 +76,10 @@ func (wc *WebContext) JSON(data any) error {
 
 // SendString ... send the text data
 func (wc *WebContext) SendString(data *strings.Reader, contentType ...string) error {
+	if data == nil {
 
+		return errors.New(InvalidData)
+	}
 	// Set the Content-Type header to application/json
 	if len(contentType) == 0 {
 		wc.Writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -96,7 +101,10 @@ func (wc *WebContext) SendString(data *strings.Reader, contentType ...string) er
 
 // SendString ... send the text data
 func (wc *WebContext) SendBytes(data *bytes.Reader) error {
+	if data == nil {
 
+		return errors.New(InvalidData)
+	}
 	// Set the Content-Type header to application/json
 	wc.Writer.Header().Set("Content-Type", "application/octet-stream")
 	if wc.ReplyStatus == 0 {
@@ -112,8 +120,79 @@ func (wc *WebContext) SendBytes(data *bytes.Reader) error {
 	return nil
 }
 
+// WriteByteToSocket .. write byte data to active websocket connection
+func (wc *WebContext) WriteByteToSocket(data []byte) error {
+	if data == nil {
+
+		return errors.New(InvalidData)
+	}
+	if wc.webConn != nil {
+		return wc.webConn.WriteMessage(websocket.BinaryMessage, data)
+
+	}
+	return errors.New(NoWebSocket)
+}
+
+// WriteTextToSocket .. write text data to active websocket connection
+func (wc *WebContext) WriteTextToSocket(data string) error {
+	if wc.webConn != nil {
+		return wc.webConn.WriteMessage(websocket.TextMessage, []byte(data))
+
+	}
+	return errors.New(NoWebSocket)
+}
+
+// WriteJsonToSocket .. write Jsob data to active websocket connection
+func (wc *WebContext) WriteJsonToSocket(data any) error {
+	if data == nil {
+
+		return errors.New(InvalidData)
+	}
+	if wc.webConn != nil {
+		return wc.webConn.WriteJSON(data)
+
+	}
+	return errors.New(NoWebSocket)
+}
+
+// ReadSocketData ... read the websocket data if its connected
+func (wc *WebContext) ReadJsonFromSocket(v any) error {
+	if v == nil {
+
+		return errors.New(InvalidData)
+	}
+
+	if wc.webConn != nil {
+		return wc.webConn.ReadJSON(v)
+	}
+	return errors.New(NoWebSocket)
+}
+
+// ReadSocketData ... read the websocket data if its connected
+func (wc *WebContext) ReadMessageFromSocket() (MessageType, []byte, error) {
+
+	if wc.webConn != nil {
+		mType, b, err := wc.webConn.ReadMessage()
+		return MessageType(mType), b, err
+	}
+	return 0, nil, errors.New(NoWebSocket)
+}
+
+// CloseSocket ... close the active web socket
+func (wc *WebContext) CloseSocket() error {
+	if wc.webConn != nil {
+		return wc.webConn.Close()
+
+	}
+	return errors.New(NoWebSocket)
+}
+
 // Render ... render the html data
 func (wc *WebContext) RenderString(data *strings.Reader) error {
+	if data == nil {
+
+		return errors.New(InvalidData)
+	}
 
 	return wc.SendString(data, "text/html; charset=utf-8")
 }
@@ -125,6 +204,10 @@ func (wc *WebContext) RenderString(data *strings.Reader) error {
 // headFile is the file that is the start of the view for example index.html
 // funcMap ... pass any function map that needs to be passed, it is optional
 func (wc *WebContext) RenderFiles(filePattern string, data any, headFile string, funcMap template.FuncMap) error {
+	if data == nil {
+
+		return errors.New(InvalidData)
+	}
 	templ := template.New("new")
 	var err error
 	if funcMap != nil {

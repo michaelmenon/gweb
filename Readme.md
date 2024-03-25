@@ -164,6 +164,31 @@ func index(ctx *gweb.WebContext) error {
 }
 ```
 
+**Websocket Server**
+
+```
+    web := gweb.New().WithLogging()
+    err := web.WebSocket("/echo", hello)
+    if err != nil {
+    fmt.Println(err)
+    }
+
+    web.Run(":8080")
+
+    func echo(ctx *gweb.WebContext) error {
+        for {
+            _, b, err := ctx.ReadMessageFromSocket()
+            if err != nil {
+                ctx.WebLog.Error("socket closed", err)
+                ctx.CloseSocket()
+                break
+            }
+            ctx.WriteTextToSocket(string(b))
+        }
+        return nil
+    }
+```
+
 **To write unit test check the sample below**
 
 ```

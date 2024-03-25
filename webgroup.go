@@ -8,9 +8,17 @@ import (
 
 // Use ... add a middleware for the Group
 func (wg *WebGroup) Use(f WebHandler) {
+	if f == nil {
+
+		return
+	}
 	wg.middlewares = append(wg.middlewares, f)
 }
 func (wg *WebGroup) Get(pattern string, f WebHandler) error {
+	if f == nil {
+
+		return errors.New(InvalidData)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -19,6 +27,10 @@ func (wg *WebGroup) Get(pattern string, f WebHandler) error {
 }
 
 func (wg *WebGroup) Post(pattern string, f WebHandler) error {
+	if f == nil {
+
+		return errors.New(InvalidData)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -27,6 +39,10 @@ func (wg *WebGroup) Post(pattern string, f WebHandler) error {
 }
 
 func (wg *WebGroup) Put(pattern string, f WebHandler) error {
+	if f == nil {
+
+		return errors.New(InvalidData)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -35,6 +51,10 @@ func (wg *WebGroup) Put(pattern string, f WebHandler) error {
 }
 
 func (wg *WebGroup) Patch(pattern string, f WebHandler) error {
+	if f == nil {
+
+		return errors.New(InvalidData)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -43,6 +63,10 @@ func (wg *WebGroup) Patch(pattern string, f WebHandler) error {
 }
 
 func (wg *WebGroup) Delete(pattern string, f WebHandler) error {
+	if f == nil {
+
+		return errors.New(InvalidData)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
@@ -51,6 +75,10 @@ func (wg *WebGroup) Delete(pattern string, f WebHandler) error {
 }
 
 func (wg *WebGroup) Options(pattern string, f WebHandler) error {
+	if f == nil {
+
+		return errors.New(InvalidData)
+	}
 	if !strings.HasPrefix(pattern, "/") {
 		return errors.New(InvalidPath)
 	}
