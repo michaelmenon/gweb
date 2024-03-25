@@ -2,9 +2,6 @@ package gweb
 
 type MessageType int
 
-const TextMessage MessageType = 1
-const BinaryMessage MessageType = 2
-
 const NotFound = "Not Found"
 const InternalServerError = "Internal Server Error"
 const InvalidData = "Invalid data"

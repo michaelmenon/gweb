@@ -58,36 +58,6 @@ func (w *Web) WithCustomCors(headers []string, methods []string) *Web {
 	return w
 }
 
-// WithDefaultReaderWriter ... use the default Redis reader writer for message passing between services
-func (w *Web) WithDefaultReaderWriter(redisHost string, webId string) *Web {
-
-	rdb, err := newRedisStream(redisHost)
-	if err != nil {
-
-		w.WebLog.Error("no redis server found")
-		return w
-	}
-	redisWebStream := &webRedisStream{
-		Rdb:   rdb,
-		WebId: webId,
-	}
-
-	return w.WithMessageReaderWriter(redisWebStream)
-}
-
-// WithMessageReaderWriter ... set a messagereaderwriter
-// by default it comes with Redis Client
-// messageChannel ... the channel to which the messages will be pushed
-// use the context Done channel to indicate if we needs to stop receiving the messages
-func (w *Web) WithMessageReaderWriter(client GwebMessageReaderWriter) *Web {
-
-	if client != nil {
-		w.MessageController = client
-	}
-
-	return w
-}
-
 // Run ... create a HTTP server and runs it on the host address provided
 // host ... it should be in the "ip:port" format
 // returns any error thorwn by the http server
@@ -123,11 +93,7 @@ func (w *Web) addRoutes(pattern string, f WebHandler, wg ...*WebGroup) {
 			e := r(wc)
 			if e != nil {
 
-				if errors.Is(e, ExpiredToken{}) || errors.Is(e, InvalidToken{}) {
-					http.Error(wr, e.Error(), http.StatusUnauthorized)
-				} else {
-					http.Error(wr, e.Error(), http.StatusBadRequest)
-				}
+				http.Error(wr, e.Error(), http.StatusBadRequest)
 				return
 			}
 		}

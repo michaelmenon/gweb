@@ -5,8 +5,6 @@ import (
 	"net/url"
 
 	"log/slog"
-
-	"github.com/gorilla/websocket"
 )
 
 // a web handler type
@@ -50,8 +48,6 @@ type WebContext struct {
 	//set by the handler
 	ReplyStatus int
 	WebLog      *slog.Logger
-	//web socket conn if the current request if a websocket
-	webConn *websocket.Conn
 }
 
 // GwebMessage received for this Gweb Service
@@ -76,10 +72,4 @@ type GwebMessageReaderWriter interface {
 	//ReadMessageStream ... read message from the stream
 	//at a time 500 max messages can be read
 	ReadMessageStream() ([]GWebMessage, error)
-}
-
-// Websocket upgrader
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
 }
